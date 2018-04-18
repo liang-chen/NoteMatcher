@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+set (CMAKE_CXX_STANDARD 11)
+project( NoteMatcher )
+find_package( OpenCV REQUIRED )
+add_executable( NoteMatcher main.cpp imageio.h imageio.cpp utilities.h )
+target_link_libraries( NoteMatcher ${OpenCV_LIBS} )
