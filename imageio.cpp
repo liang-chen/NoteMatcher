@@ -50,16 +50,31 @@ namespace{
     rgbImage.at<Vec3b>(y, x) = Vec3b(b, g, r);
   }
 
-  void drawLine(cv::Mat& rgbImage, int y){
+  void drawHorizLine(cv::Mat& rgbImage, int y){
     for(int x = 0; x < rgbImage.cols; x++){
       setRGB(rgbImage, y, x, 255, 0, 0);
     }
   }
 
-  void drawStaff(cv::Mat& rgbImage, int y, int g){
+  void drawStaff(cv::Mat& rgbImage, const Staff& staff){
+    int y = staff.getTopy();
+    int g = staff.getGap();
     for(int i = 0; i < 5; i++){
-      drawLine(rgbImage, y+i*g);
+      drawHorizLine(rgbImage, y+i*g);
     }
+  }
+
+  void drawVertLine(cv::Mat& rgbImage, int x, int y1, int y2){
+    for(int y = y1; y < y2; y++){
+      setRGB(rgbImage, y, x, 255, 0, 0);
+    }
+  }
+
+  void drawBar(cv::Mat& rgbImage, const Bar& g){
+    int x = g.getTopx();
+    int y = g.getTopy();
+    int l = g.getLength();
+    drawVertLine(rgbImage, x, y, y+l);
   }
 }
 
@@ -78,8 +93,9 @@ void ImageReader::findStaves(){
   float bthresh = 0.8*image_bw.cols;
   float wthresh = 0.5*image_bw.cols;
 
-  int minGap = 9;//6;
-  int maxGap = 9;//10;
+  //assumes the optimal gap is always 9 pixels for now.
+  int minGap = 9;//7;
+  int maxGap = 9;//11;
 
   //0: no staff; 1: having staff
   std::vector<std::vector<float>> scores(hist.size(), std::vector<float>(2, -1));
@@ -124,12 +140,36 @@ void ImageReader::findStaves(){
   std::reverse(staves.begin(), staves.end());
 }
 
-void ImageReader::displayStaves(){
+void ImageReader::findBars(){
+  for(int i = 0; i < staves.size()-1; i+= 2){
+    int top_y = staves[i].getTopy();
+    int g = staves[i+1].getGap();
+    int bot_y = staves[i+1].getTopy() + 4*g;
+
+    for(int x = 0; x < image_bw.cols; x++){
+      float curr = 0;
+      for(int y = top_y; y < bot_y; y++){
+        curr += 1 - image_bw.at<uchar>(y, x)/255.0;
+      }
+      if(curr > 0.9 * (bot_y - top_y)){
+        Bar top_b(x, top_y, 4*g);
+        staves[i].addBar(top_b);
+        Bar bot_b(x, bot_y-4*g, 4*g);
+        staves[i+1].addBar(bot_b);
+      }
+    }
+  }
+}
+
+void ImageReader::displayStaves() const{
   cv::Mat imageDisplay;
   cv::cvtColor(image, imageDisplay, cv::COLOR_GRAY2BGR);
-  for(auto staff: staves){
+  for(const auto& staff: staves){
     //std::cout << staff.getTopy() << staff.getGap() << std::endl;
-    drawStaff(imageDisplay, staff.getTopy(), staff.getGap());
+    drawStaff(imageDisplay, staff);
+    for(const auto& bar: staff.getBars()){
+      drawBar(imageDisplay, bar);
+    }
   }
 
   cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE);

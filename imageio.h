@@ -19,7 +19,8 @@ class ImageReader{
   ~ImageReader(){}
 
   void findStaves();
-  void displayStaves();
+  void findBars();
+  void displayStaves() const;
   void display() const{
     namedWindow("Display Image", WINDOW_AUTOSIZE);
     imshow("Display Image", image);
