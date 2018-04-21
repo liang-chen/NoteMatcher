@@ -2,8 +2,12 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "utilities.h"
+#include <iostream>
+#include <algorithm>
+#include <utility>
+#include <cmath>
 #include <opencv2/opencv.hpp>
+#include "utilities.h"
 
 using namespace cv;
 class ImageReader{
@@ -15,7 +19,8 @@ class ImageReader{
   ~ImageReader(){}
 
   void findStaves();
-  void display(){
+  void displayStaves();
+  void display() const{
     namedWindow("Display Image", WINDOW_AUTOSIZE);
     imshow("Display Image", image);
     waitKey(0);

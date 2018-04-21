@@ -24,6 +24,9 @@ class Staff{
   std::vector<Bar> getBars() const{return bars;}
   int getTopy() const{return topy;}
   int getGap() const{return gap;}
+  void setTopy(int y) {topy = y;}
+  void setGap(int g) {gap = g;}
+  void addBar(const Bar& b) {bars.push_back(b);}
 
  private:
   int topy;
