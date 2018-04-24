@@ -33,3 +33,20 @@ class Staff{
   int gap;
   std::vector<Bar> bars;
 };
+
+class Rect{
+ public:
+ Rect(int x, int y, int w, int h): topx(x), topy(y), width(w), height(h){}
+  ~Rect(){}
+
+  int getTopx() const{return topx;}
+  int getTopy() const{return topy;}
+  int getWidth() const{return width;}
+  int getHeight() const{return height;}
+
+ private:
+  int topx;
+  int topy;
+  int width;
+  int height;
+};

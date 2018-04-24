@@ -47,7 +47,7 @@ namespace{
   }
 
   void setRGB(cv::Mat& rgbImage, int y, int x, float r, float g, float b){
-    rgbImage.at<Vec3b>(y, x) = Vec3b(b, g, r);
+    rgbImage.at<cv::Vec3b>(y, x) = cv::Vec3b(b, g, r);
   }
 
   void drawHorizLine(cv::Mat& rgbImage, int y){
@@ -146,6 +146,8 @@ void ImageReader::findBars(){
     int g = staves[i+1].getGap();
     int bot_y = staves[i+1].getTopy() + 4*g;
 
+    int prev_bar_x = -1;
+
     for(int x = 0; x < image_bw.cols; x++){
       float curr = 0;
       for(int y = top_y; y < bot_y; y++){
@@ -156,9 +158,24 @@ void ImageReader::findBars(){
         staves[i].addBar(top_b);
         Bar bot_b(x, bot_y-4*g, 4*g);
         staves[i+1].addBar(bot_b);
+
+        if(prev_bar_x > 0){
+          measures.emplace_back(prev_bar_x, top_y, x-prev_bar_x, bot_y-top_y);
+        }
+        prev_bar_x = x;
       }
     }
   }
+}
+
+void ImageReader::saveMeasures() const{
+  std::ofstream file;
+  file.open(path+"/measures/"+filename+".txt");
+  for(auto measure: measures){
+    file << measure.getTopx() << " " << measure.getTopy() << " " << measure.getWidth()
+         << " " << measure.getHeight() << std::endl;
+  }
+  file.close();
 }
 
 void ImageReader::displayStaves() const{
